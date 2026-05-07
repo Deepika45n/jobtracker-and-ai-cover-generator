@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Backend (Spring Boot)",
+            "type": "java",
+            "request": "launch",
+            "mainClass": "com.jobtracker.JobtrackerApplication",
+            "projectName": "jobtracker",
+            "args": "",
+            "env": {
+                "server.port": "8080"
+            }
+        },
+        {
+            "name": "Launch Frontend (Vite)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/frontend/src"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Full Stack App",
+            "configurations": [
+                "Launch Backend (Spring Boot)",
+                "Launch Frontend (Vite)"
+            ]
+        }
+    ]
+}

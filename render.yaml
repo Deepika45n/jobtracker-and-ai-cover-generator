@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: jobtracker-api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+    envVars:
+      SPRING_DATASOURCE_URL: jdbc:mysql://<MYSQL_HOST>/jobtracker?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      ANTHROPIC_API_KEY: <YOUR_ANTHROPIC_KEY>
+      CORS_ALLOWED_ORIGINS:https://jobtracker-frontend.vercel.app,https://jobtracker-frontend.netlify.app
+      SPRING_PROFILES_ACTIVE: prod
