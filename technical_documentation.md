@@ -6,21 +6,88 @@ JobTrack AI is a full-stack web application. The monolithic repository contains 
 ### Directory Structure
 ```
 jobtracker-and-ai-cover-generator/
-├── src/main/java/com/jobtracker/       # Backend Java Source
-│   ├── config/                         # Configuration (CORS, Security)
-│   ├── controller/                     # REST API Controllers
-│   ├── model/                          # JPA Entities
-│   ├── repository/                     # Spring Data JPA Interfaces
-│   └── service/                        # Business Logic
-├── src/main/resources/                 # Backend Resources (application.properties)
-├── pom.xml                             # Maven Dependencies
-└── frontend/                           # React Frontend Application
-    ├── src/
-    │   ├── components/                 # Reusable UI Components
-    │   ├── pages/                      # Page Level Components (Login, Register, Dashboard)
-    │   └── store/                      # Zustand State Stores (authStore, jobStore)
-    ├── vite.config.js                  # Vite Build Configuration
-    └── package.json                    # Node Dependencies
+├── src/
+│   ├── main/
+│   │   ├── java/com/jobtracker/           # Backend Java Source
+│   │   │   ├── config/                    # Configuration (CORS, Security, Database)
+│   │   │   │   ├── CorsConfig.java
+│   │   │   │   └── SecurityConfig.java
+│   │   │   ├── controller/                # REST API Controllers
+│   │   │   │   ├── AuthController.java
+│   │   │   │   ├── JobApplicationController.java
+│   │   │   │   └── AICoverLetterController.java
+│   │   │   ├── model/                     # JPA Entity Models
+│   │   │   │   ├── User.java
+│   │   │   │   └── JobApplication.java
+│   │   │   ├── repository/                # Spring Data JPA Interfaces
+│   │   │   │   ├── UserRepository.java
+│   │   │   │   └── JobApplicationRepository.java
+│   │   │   ├── service/                   # Business Logic & Service Layer
+│   │   │   │   ├── UserService.java
+│   │   │   │   ├── JobApplicationService.java
+│   │   │   │   ├── AICoverLetterService.java
+│   │   │   │   └── AuthenticationService.java
+│   │   │   ├── util/                      # Utility Classes
+│   │   │   │   └── JwtTokenUtil.java
+│   │   │   └── JobTrackerApplication.java # Main Spring Boot Entry Point
+│   │   └── resources/                     # Backend Resources
+│   │       ├── application.properties     # Database & Spring Configuration
+│   │       ├── application-dev.properties
+│   │       └── application-prod.properties
+│   └── test/
+│       └── java/com/jobtracker/           # Unit & Integration Tests
+│           ├── controller/
+│           └── service/
+│
+├── frontend/                              # React Frontend Application
+│   ├── public/                            # Static Assets
+│   │   ├── favicon.ico
+│   │   └── index.html
+│   ├── src/
+│   │   ├── assets/                        # Images, Icons, Fonts
+│   │   │   ├── images/
+│   │   │   └── icons/
+│   │   ├── components/                    # Reusable UI Components
+│   │   │   ├── Header.jsx
+│   │   │   ├── Sidebar.jsx
+│   │   │   ├── JobCard.jsx
+│   │   │   ├── Modal.jsx
+│   │   │   └── Navbar.jsx
+│   │   ├── pages/                         # Page-Level Components
+│   │   │   ├── Login.jsx
+│   │   │   ├── Register.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── MyApplications.jsx
+│   │   │   ├── AICoverLetter.jsx
+│   │   │   └── NotFound.jsx
+│   │   ├── store/                         # Zustand State Management
+│   │   │   ├── authStore.js
+│   │   │   ├── jobStore.js
+│   │   │   └── themeStore.js
+│   │   ├── hooks/                         # Custom React Hooks
+│   │   │   ├── useAuth.js
+│   │   │   └── useFetch.js
+│   │   ├── utils/                         # Utility Functions
+│   │   │   ├── api.js                     # API Client Configuration
+│   │   │   ├── validators.js
+│   │   │   └── formatters.js
+│   │   ├── styles/                        # Global Styles
+│   │   │   ├── index.css
+│   │   │   ├── tailwind.css
+│   │   │   └── variables.css
+│   │   ├── App.jsx                        # Root React Component
+│   │   └── main.jsx                       # React Entry Point
+│   ├── .env.example                       # Environment Variables Template
+│   ├── package.json                       # Node Dependencies
+│   ├── tailwind.config.js                 # Tailwind CSS Configuration
+│   ├── vite.config.js                     # Vite Build Configuration
+│   └── .gitignore
+│
+├── pom.xml                                # Maven Project Configuration & Dependencies
+├── .gitignore
+├── README.md                              # Project Documentation
+├── CONTRIBUTING.md                        # Contribution Guidelines
+└── technical_documentation.md             # This File
 ```
 
 ---
@@ -55,7 +122,7 @@ The backend follows a classic MVC/N-Tier architecture.
 
 ### 2.4 REST Controllers (`/controller`)
 Controllers are annotated with `@RestController` and map HTTP methods to service calls.
-- **`AuthController.java`**: Exposes `/api/auth/register`, `/login`, `/forgot-password`, `/reset-password`. It catches runtime exceptions (like "Email already exists") and formats them into HTTP 400 Bad Request JSON responses.
+- **`AuthController.java`**: Exposes `/api/auth/register`, `/login`, `/forgot-password`, `/reset-password`. It catches runtime exceptions (like "Email already exists") and formats them into HTTP 400 Bad Request responses.
 - **`JobApplicationController.java`**: Exposes CRUD endpoints under `/api/jobs`.
 - **`AICoverLetterController.java`**: Exposes `/api/ai/generate-cover-letter`.
 
