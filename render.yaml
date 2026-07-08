@@ -6,9 +6,9 @@ services:
     healthCheckPath: /actuator/health
     autoDeploy: true
     envVars:
-      SPRING_DATASOURCE_URL: jdbc:mysql://<MYSQL_HOST>/jobtracker?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_URL: jdbc:postgresql://dpg-d7u6nsugvqtc73c71l9g-a/jobtracker?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
-      ANTHROPIC_API_KEY: <YOUR_ANTHROPIC_KEY>
-      CORS_ALLOWED_ORIGINS:https://jobtracker-frontend.vercel.app,https://jobtracker-frontend.netlify.app
+      GEMINI_API_KEY: AIzaSyAnfwO2c7mh1utC3HbRqtaBjtEAYdKRMhk
+      CORS_ALLOWED_ORIGINS: https://jobtracker-frontend.vercel.app,https://jobtracker-frontend.netlify.app
       SPRING_PROFILES_ACTIVE: prod

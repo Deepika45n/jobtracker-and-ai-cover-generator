@@ -61,4 +61,40 @@ public class AuthController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String token = userService.generatePasswordResetToken(email);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Password reset token generated.");
+            response.put("token", token); // In a real app, send this via email instead of returning it.
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        try {
+            String token = request.get("token");
+            String newPassword = request.get("password");
+            userService.resetPasswordWithToken(token, newPassword);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Password reset successful.");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 }

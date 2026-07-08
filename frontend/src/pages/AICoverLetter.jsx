@@ -4,6 +4,8 @@ import { Sparkles, Copy, Download, RefreshCw, FileText, ChevronDown, Check, Load
 import useAuthStore from '../store/authStore';
 import useJobStore from '../store/jobStore';
 
+const API_URL = import.meta.env.DEV ? 'http://localhost:8080/api' : '/api';
+
 const AICoverLetter = () => {
   const { user } = useAuthStore();
   const { jobs, updateJob } = useJobStore();
@@ -21,7 +23,7 @@ const AICoverLetter = () => {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const selectedJob = jobs.find(j => j.id === selectedJobId) || passedJob || null;
+  const selectedJob = jobs.find(j => String(j.id) === String(selectedJobId)) || passedJob || null;
 
   const handleGenerate = async () => {
     if (!selectedJob && (!passedJob || !passedJob.title)) {
@@ -38,13 +40,13 @@ const AICoverLetter = () => {
     setGeneratedLetter('');
 
     try {
-      const response = await fetch('http://localhost:8080/api/ai/cover-letter/generate', {
+      const response = await fetch(`${API_URL}/ai/cover-letter/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          userName: user.name,
+          userName: user?.name || 'Applicant',
           background: background,
           jobTitle: selectedJob?.title || passedJob?.title,
           company: selectedJob?.company || passedJob?.company,
@@ -237,7 +239,7 @@ const AICoverLetter = () => {
                   <Sparkles size={32} className="text-textSecondary" />
                 </div>
                 <h3 className="text-lg font-medium text-textPrimary">Ready to generate</h3>
-                <p className="text-sm">Fill in your background details, select a job, and click generate to create a tailored cover letter powered by Claude AI.</p>
+                <p className="text-sm">Fill in your background details, select a job, and click generate to create a tailored cover letter powered by Gemini AI.</p>
               </div>
             )}
           </div>

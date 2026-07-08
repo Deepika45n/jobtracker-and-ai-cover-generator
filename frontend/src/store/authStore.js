@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = import.meta.env.DEV ? 'http://localhost:8080/api' : '/api';
 
 const useAuthStore = create((set, get) => {
   const session = JSON.parse(localStorage.getItem('jt_session'));
@@ -68,6 +68,38 @@ const useAuthStore = create((set, get) => {
         }
       } catch (error) {
         console.error('Update profile failed', error);
+      }
+    },
+    forgotPassword: async (email) => {
+      try {
+        const res = await fetch(`${API_URL}/auth/forgot-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          return { success: true, token: data.token };
+        }
+        return { success: false, error: data.error || 'Email verification failed' };
+      } catch (error) {
+        return { success: false, error: 'Network error' };
+      }
+    },
+    resetPassword: async (token, password) => {
+      try {
+        const res = await fetch(`${API_URL}/auth/reset-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          return { success: true };
+        }
+        return { success: false, error: data.error || 'Password reset failed' };
+      } catch (error) {
+        return { success: false, error: 'Network error' };
       }
     }
   };

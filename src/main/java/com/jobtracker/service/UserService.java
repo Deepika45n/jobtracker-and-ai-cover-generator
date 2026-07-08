@@ -5,11 +5,14 @@ import com.jobtracker.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ConcurrentHashMap<String, String> resetTokens = new ConcurrentHashMap<>();
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -39,5 +42,31 @@ public class UserService {
         if (updatedUser.getEmail() != null) user.setEmail(updatedUser.getEmail());
         if (updatedUser.getPassword() != null) user.setPassword(updatedUser.getPassword());
         return userRepository.save(user);
+    }
+
+    public void verifyEmailExists(String email) {
+        userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email not found"));
+    }
+
+    public void resetPassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setPassword(newPassword);
+        userRepository.save(user);
+    }
+
+    public String generatePasswordResetToken(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email not found"));
+        String token = UUID.randomUUID().toString();
+        resetTokens.put(token, user.getEmail());
+        return token;
+    }
+
+    public void resetPasswordWithToken(String token, String newPassword) {
+        String email = resetTokens.get(token);
+        if (email == null) {
+            throw new RuntimeException("Invalid or expired token");
+        }
+        resetTokens.remove(token);
+        resetPassword(email, newPassword);
     }
 }

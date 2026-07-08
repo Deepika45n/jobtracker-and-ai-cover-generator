@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = import.meta.env.DEV ? 'http://localhost:8080/api' : '/api';
 
 const useJobStore = create((set, get) => ({
   jobs: [],
