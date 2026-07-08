@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # JobTracker AI
 
 A full‑stack job‑application tracker (Spring Boot + React/Vite).
