@@ -1,6 +1,22 @@
+# ── Secrets (NEVER commit these) ──────────────────────────────────────
 .env
+.env.local
+.env.*.local
+
+# ── Maven build output ─────────────────────────────────────────────────
 target/
 *.jar
+*.war
+*.class
+
+# ── IDE files ──────────────────────────────────────────────────────────
 .classpath
 .project
 .settings/
+.idea/
+*.iml
+.vscode/
+
+# ── OS files ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
