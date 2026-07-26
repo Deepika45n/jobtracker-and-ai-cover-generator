@@ -4,7 +4,7 @@ import { Sparkles, Copy, Download, RefreshCw, FileText, ChevronDown, Check, Load
 import useAuthStore from '../store/authStore';
 import useJobStore from '../store/jobStore';
 
-const API_URL = import.meta.env.DEV ? 'http://localhost:8080/api' : '/api';
+const API_URL = import.meta.env.DEV ? 'http://localhost:8080/api' : (import.meta.env.VITE_API_URL || '/api');
 
 const AICoverLetter = () => {
   const { user } = useAuthStore();
@@ -23,7 +23,19 @@ const AICoverLetter = () => {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
 
+  const [qualityMode, setQualityMode] = useState('PROFESSIONAL');
+  const [remainingGenerations, setRemainingGenerations] = useState(null);
+
   const selectedJob = jobs.find(j => String(j.id) === String(selectedJobId)) || passedJob || null;
+
+  useEffect(() => {
+    if (user?.id) {
+      fetch(`${API_URL}/ai/cover-letter/remaining/${user.id}`)
+        .then(res => res.json())
+        .then(data => setRemainingGenerations(data.remaining))
+        .catch(err => console.error("Failed to fetch remaining generations", err));
+    }
+  }, [user?.id]);
 
   const handleGenerate = async () => {
     if (!selectedJob && (!passedJob || !passedJob.title)) {
@@ -46,24 +58,29 @@ const AICoverLetter = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          userId: user?.id,
           userName: user?.name || 'Applicant',
           background: background,
           jobTitle: selectedJob?.title || passedJob?.title,
           company: selectedJob?.company || passedJob?.company,
           location: selectedJob?.location || passedJob?.location,
           jobDescription: selectedJob?.description || passedJob?.description,
-          tone: tone
+          tone: tone,
+          qualityMode: qualityMode
         })
       });
 
       if (!response.ok) {
         const errData = await response.json();
-        throw new Error(errData.error || 'Failed to generate cover letter');
+        throw new Error(errData.error || errData.message || 'Failed to generate cover letter');
       }
 
       const data = await response.json();
       const text = data.coverLetter;
       setGeneratedLetter(text);
+      if (data.remainingAiGenerations !== undefined) {
+        setRemainingGenerations(data.remainingAiGenerations);
+      }
 
       // Save back to job if it's in tracker
       if (selectedJob && selectedJob.id) {
@@ -166,6 +183,26 @@ const AICoverLetter = () => {
                       {t}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-textSecondary mb-2">Quality Mode</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setQualityMode('STANDARD')}
+                    className={`py-2 px-3 rounded-lg text-sm transition-colors border text-left ${qualityMode === 'STANDARD' ? 'bg-accent/10 border-accent/30 text-accent font-medium' : 'bg-primary border-border text-textSecondary hover:bg-surface2'}`}
+                  >
+                    <div className="font-semibold">Standard</div>
+                    <div className="text-xs opacity-70">Template-based. Unlimited.</div>
+                  </button>
+                  <button
+                    onClick={() => setQualityMode('PROFESSIONAL')}
+                    className={`py-2 px-3 rounded-lg text-sm transition-colors border text-left ${qualityMode === 'PROFESSIONAL' ? 'bg-accent/10 border-accent/30 text-accent font-medium' : 'bg-primary border-border text-textSecondary hover:bg-surface2'}`}
+                  >
+                    <div className="font-semibold">Professional</div>
+                    <div className="text-xs opacity-70">AI-enhanced. {remainingGenerations !== null ? `${remainingGenerations} left` : 'Loading...'}</div>
+                  </button>
                 </div>
               </div>
 

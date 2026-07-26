@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Search, Briefcase, Sparkles, LineChart, Settings, LogOut, Menu, X, Moon, Sun } from 'lucide-react';
+import { LayoutDashboard, Search, Briefcase, Sparkles, LineChart, Settings, LogOut, Menu, X, Moon, Sun, History } from 'lucide-react';
 import { useState } from 'react';
 import useAuthStore from '../store/authStore';
 import useThemeStore from '../store/themeStore';
@@ -16,6 +16,7 @@ const SidebarLayout = () => {
     { name: 'Find Jobs', path: '/jobs', icon: Search },
     { name: 'My Applications', path: '/applications', icon: Briefcase },
     { name: 'AI Cover Letter', path: '/cover-letter', icon: Sparkles },
+    { name: 'Letter History', path: '/letter-history', icon: History },
     { name: 'Analytics', path: '/analytics', icon: LineChart },
     { name: 'Settings', path: '/settings', icon: Settings },
   ];

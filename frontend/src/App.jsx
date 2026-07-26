@@ -15,6 +15,7 @@ import MyApplications from './pages/MyApplications';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import AICoverLetter from './pages/AICoverLetter';
+import CoverLetterHistory from './pages/CoverLetterHistory';
 
 const AuthGuard = ({ children }) => {
   const { user } = useAuthStore();
@@ -52,6 +53,7 @@ function App() {
           <Route path="jobs" element={<FindJobs />} />
           <Route path="applications" element={<MyApplications />} />
           <Route path="cover-letter" element={<AICoverLetter />} />
+          <Route path="letter-history" element={<CoverLetterHistory />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />
         </Route>

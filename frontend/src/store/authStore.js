@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-const API_URL = import.meta.env.DEV ? 'http://localhost:8080/api' : '/api';
+const API_URL = import.meta.env.DEV ? 'http://localhost:8080/api' : (import.meta.env.VITE_API_URL || '/api');
 
 const useAuthStore = create((set, get) => {
   const session = JSON.parse(localStorage.getItem('jt_session'));

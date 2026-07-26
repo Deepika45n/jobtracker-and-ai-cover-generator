@@ -1,87 +1,85 @@
 package com.jobtracker.controller;
 
-import com.jobtracker.service.AICoverLetterService;
+import com.jobtracker.dto.CoverLetterHistoryResponse;
+import com.jobtracker.dto.CoverLetterRequest;
+import com.jobtracker.dto.CoverLetterResponse;
+import com.jobtracker.model.CoverLetter;
+import com.jobtracker.service.CoverLetterService;
+import com.jobtracker.service.RateLimitService;
+import com.jobtracker.service.ai.AIRouterService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/ai/cover-letter")
 public class AICoverLetterController {
 
-    private final AICoverLetterService aiCoverLetterService;
+    private final AIRouterService aiRouterService;
+    private final CoverLetterService coverLetterService;
+    private final RateLimitService rateLimitService;
 
-    public AICoverLetterController(AICoverLetterService aiCoverLetterService) {
-        this.aiCoverLetterService = aiCoverLetterService;
+    public AICoverLetterController(AIRouterService aiRouterService, CoverLetterService coverLetterService, RateLimitService rateLimitService) {
+        this.aiRouterService = aiRouterService;
+        this.coverLetterService = coverLetterService;
+        this.rateLimitService = rateLimitService;
     }
 
     @PostMapping("/generate")
-    public ResponseEntity<?> generateCoverLetter(@RequestBody CoverLetterRequest request) {
-        try {
-            String coverLetter = aiCoverLetterService.generateCoverLetter(
-                request.getUserName(),
-                request.getBackground(),
-                request.getJobTitle(),
-                request.getCompany(),
-                request.getLocation(),
-                request.getJobDescription(),
-                request.getTone()
-            );
-            return ResponseEntity.ok(new CoverLetterResponse(coverLetter));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(500)
-                .body(new ErrorResponse("API configuration error: " + e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(500)
-                .body(new ErrorResponse("Failed to generate cover letter: " + e.getMessage()));
+    public ResponseEntity<CoverLetterResponse> generateCoverLetter(@Valid @RequestBody CoverLetterRequest request) {
+        // Defaults if missing
+        if (request.getQualityMode() == null) {
+            request.setQualityMode("PROFESSIONAL");
         }
+        
+        CoverLetterResponse response = aiRouterService.generateCoverLetter(request);
+        return ResponseEntity.ok(response);
     }
 
-    // Request/Response DTOs
-    public static class CoverLetterRequest {
-        private String userName;
-        private String background;
-        private String jobTitle;
-        private String company;
-        private String location;
-        private String jobDescription;
-        private String tone;
-
-        // Getters and setters
-        public String getUserName() { return userName; }
-        public void setUserName(String userName) { this.userName = userName; }
-        public String getBackground() { return background; }
-        public void setBackground(String background) { this.background = background; }
-        public String getJobTitle() { return jobTitle; }
-        public void setJobTitle(String jobTitle) { this.jobTitle = jobTitle; }
-        public String getCompany() { return company; }
-        public void setCompany(String company) { this.company = company; }
-        public String getLocation() { return location; }
-        public void setLocation(String location) { this.location = location; }
-        public String getJobDescription() { return jobDescription; }
-        public void setJobDescription(String jobDescription) { this.jobDescription = jobDescription; }
-        public String getTone() { return tone; }
-        public void setTone(String tone) { this.tone = tone; }
+    @GetMapping("/history/{userId}")
+    public ResponseEntity<List<CoverLetterHistoryResponse>> getHistory(@PathVariable Long userId) {
+        List<CoverLetterHistoryResponse> history = coverLetterService.getUserCoverLetters(userId).stream()
+            .map(cl -> new CoverLetterHistoryResponse(
+                cl.getId(),
+                cl.getCompany(),
+                cl.getRole(),
+                cl.getGeneratedText().length() > 100 ? cl.getGeneratedText().substring(0, 100) + "..." : cl.getGeneratedText(),
+                cl.getProviderUsed(),
+                cl.getQualityMode(),
+                cl.getCreatedAt()
+            ))
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(history);
     }
 
-    public static class CoverLetterResponse {
-        private String coverLetter;
-
-        public CoverLetterResponse(String coverLetter) {
-            this.coverLetter = coverLetter;
-        }
-
-        public String getCoverLetter() { return coverLetter; }
-        public void setCoverLetter(String coverLetter) { this.coverLetter = coverLetter; }
+    @GetMapping("/{id}")
+    public ResponseEntity<CoverLetter> getCoverLetter(@PathVariable Long id) {
+        return ResponseEntity.ok(coverLetterService.getCoverLetter(id));
     }
 
-    public static class ErrorResponse {
-        private String error;
+    @PutMapping("/{id}")
+    public ResponseEntity<CoverLetter> updateCoverLetter(@PathVariable Long id, @RequestBody java.util.Map<String, String> payload) {
+        String newText = payload.get("generatedText");
+        return ResponseEntity.ok(coverLetterService.updateCoverLetterText(id, newText));
+    }
 
-        public ErrorResponse(String error) {
-            this.error = error;
-        }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCoverLetter(@PathVariable Long id) {
+        coverLetterService.deleteCoverLetter(id);
+        return ResponseEntity.ok().build();
+    }
 
-        public String getError() { return error; }
-        public void setError(String error) { this.error = error; }
+    @PostMapping("/{id}/duplicate")
+    public ResponseEntity<CoverLetter> duplicateCoverLetter(@PathVariable Long id) {
+        return ResponseEntity.ok(coverLetterService.duplicateCoverLetter(id));
+    }
+
+    @GetMapping("/remaining/{userId}")
+    public ResponseEntity<java.util.Map<String, Integer>> getRemainingGenerations(@PathVariable Long userId) {
+        int remaining = rateLimitService.getRemainingTokens(userId);
+        return ResponseEntity.ok(java.util.Map.of("remaining", remaining));
     }
 }
