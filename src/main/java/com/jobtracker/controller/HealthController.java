@@ -26,16 +26,6 @@ public class HealthController {
         response.put("service", "jobtracker");
         return ResponseEntity.ok(response);
     }
-
-    /**
-     * Matches Railway's default healthcheck path: /actuator/health
-     * Avoids needing the full spring-boot-starter-actuator dependency.
-     */
-    @GetMapping("/actuator/health")
-    public ResponseEntity<?> actuatorHealth() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "UP");
-        return ResponseEntity.ok(response);
-    }
 }
+
 
